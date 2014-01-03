@@ -23,20 +23,20 @@
 class MySQL {
 	
 	// Base variables
-	var $lastError;					// Holds the last error
-	var $lastQuery;					// Holds the last query
-	var $result;						// Holds the MySQL query result
-	var $records;						// Holds the total number of records returned
-	var $affected;					// Holds the total number of records affected
-	var $rawResults;				// Holds raw 'arrayed' results
-	var $arrayedResult;			// Holds an array of the result
+	private $lastError;					// Holds the last error
+	private $lastQuery;					// Holds the last query
+	private $result;						// Holds the MySQL query result
+	private $records;						// Holds the total number of records returned
+	private $affected;					// Holds the total number of records affected
+	private $rawResults;				// Holds raw 'arrayed' results
+	private $arrayedResult;			// Holds an array of the result
 	
-	var $hostname;	// MySQL Hostname
-	var $username;	// MySQL Username
-	var $password;	// MySQL Password
-	var $database;	// MySQL Database
+	private $hostname;	// MySQL Hostname
+	private $username;	// MySQL Username
+	private $password;	// MySQL Password
+	private $database;	// MySQL Database
 	
-	var $databaseLink;		// Database Connection Link
+	private $databaseLink;		// Database Connection Link
 	
 
 
@@ -44,11 +44,11 @@ class MySQL {
 	 * Class Constructor *
 	 * *******************/
 	
-	function __construct($database, $username, $password, $hostname='localhost'){
+	function __construct($database, $username, $password, $hostname='localhost', $port=3306){
 		$this->database = $database;
 		$this->username = $username;
 		$this->password = $password;
-		$this->hostname = $hostname;
+		$this->hostname = $hostname.':'.$port;
 		
 		$this->Connect();
 	}
@@ -62,7 +62,7 @@ class MySQL {
 	// Connects class to database
 	// $persistant (boolean) - Use persistant connection?
 	private function Connect($persistant = false){
-		$this->CloseConnection();
+		$this->Close();
 		
 		if($persistant){
 			$this->databaseLink = mysql_pconnect($this->hostname, $this->username, $this->password);
@@ -115,7 +115,7 @@ class MySQL {
 	 * ******************/
 	
 	// Executes MySQL query
-	function ExecuteSQL($query){
+	function Query($query){
 		$this->lastQuery 	= $query;
 		if($this->result 	= mysql_query($query, $this->databaseLink)){
 			$this->records 	= @mysql_num_rows($this->result);
@@ -159,7 +159,7 @@ class MySQL {
 		
 		$query = substr($query, 0, -2);
 		
-		return $this->ExecuteSQL($query);
+		return $this->Query($query);
 	}
 	
 	// Deletes a record from the database
@@ -186,7 +186,7 @@ class MySQL {
 			$query .= ' LIMIT ' . $limit;
 		}
 		
-		return $this->ExecuteSQL($query);
+		return $this->Query($query);
 	}
 	
 	
@@ -227,7 +227,7 @@ class MySQL {
 			$query .= ' LIMIT ' . $limit;
 		}
 		
-		return $this->ExecuteSQL($query);
+		return $this->Query($query);
 		
 	}
 	
@@ -269,7 +269,7 @@ class MySQL {
 		
 		$query = substr($query, 0, -5);
 		
-		return $this->ExecuteSQL($query);
+		return $this->Query($query);
 	}
 	
 	// 'Arrays' a single result
@@ -318,7 +318,7 @@ class MySQL {
 	}
 
 	// Closes the connections
-	function CloseConnection(){
+	function Close(){
 		if($this->databaseLink){
 			mysql_close($this->databaseLink);
 		}
